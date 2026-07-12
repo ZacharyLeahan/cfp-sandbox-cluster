@@ -39,6 +39,24 @@ The sandbox environment uses a GitOps approach for deployments. When you push ch
 
 ## Managing the Application
 
+### PlantAgents nursery data sync
+
+Create a read-only `plantagents-postgres` SealedSecret before enabling the weekly job:
+
+```powershell
+kubectl create secret generic plantagents-postgres --from-literal=PLANTAGENTS_DATABASE_URL='postgresql://...' --dry-run=client -o yaml > plantagents-postgres-secret.yaml
+kubeseal --cert https://sealed-secrets.sandbox.k8s.phl.io/v1/cert.pem --namespace choose-native-plants -f plantagents-postgres-secret.yaml -w cfp-sandbox-cluster/choose-native-plants.secrets/plantagents-postgres.yaml
+```
+
+Set `plantagentsSync.enabled: true`, deploy, and launch a one-off verification from the CronJob:
+
+```powershell
+kubectl create job --from=cronjob/choose-native-plants-plantagents-sync plantagents-sync-manual -n choose-native-plants
+kubectl logs -n choose-native-plants job/plantagents-sync-manual
+```
+
+The last log line is the JSON sync report. Verify `/api/v1/plantagents-sync-status` and representative nursery searches before enabling live.
+
 ### Syncing Images
 
 To sync images with the Linode Object Storage, use this command which automatically finds the current pod:

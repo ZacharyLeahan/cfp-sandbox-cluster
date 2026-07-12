@@ -10,8 +10,6 @@ app:
     - secretRef:
         name: mongo
     - secretRef:
-        name: pac-api
-    - secretRef:
         name: linode-storage
 
 # Resource settings for the application
@@ -28,4 +26,8 @@ resources:
 # (removed existingService and existingIngress configuration)
 
 ingress:
+  enabled: false
+
+# Enable after choose-native-plants.secrets/plantagents-postgres.yaml is sealed.
+plantagentsSync:
   enabled: false
